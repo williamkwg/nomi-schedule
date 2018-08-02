@@ -30,6 +30,14 @@ export default class {
     });
   }
 
+  _execSchedule(schedule) {
+    if (!schedule) {
+      return;
+    }
+    schedule.exec();
+    !schedule.executedCb && schedule.execCb();
+  }
+
   _readDir(dir) {
     dir = dir || defaultDir;
     if (isString(dir)) {
@@ -68,10 +76,10 @@ export default class {
   _runAll() {
     this.validScheduleMap.values().forEach((schedule) => {
       if (schedule.immediate) {
-        this.immediateMap.set(schedule.name, setImmediate(schedule.exec));
+        this.immediateMap.set(schedule.name, setImmediate(this._execSchedule, schedule));
       }
       if (schedule.interval) {
-        this.intervalMap.set(schedule.name, this.setInterval(schedule.exec, schedule.interval));
+        this.intervalMap.set(schedule.name, this.setInterval(this._execSchedule, schedule.interval, schedule));
       }
       if (schedule.cron) {
         try {
@@ -101,7 +109,7 @@ export default class {
       throw err;
     }
     const timer = this.setTimeout(() => {
-      schedule.exec();
+      this._execSchedule(schedule);
       this._runTimeoutByCron(name, intervalInst, cb);
     }, nextTickTime - now);
     cb && cb(timer);

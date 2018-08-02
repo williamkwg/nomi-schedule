@@ -13,6 +13,7 @@ export default class Schedule {
     this.corn = config.corn;
     this.cronOptions = config.cronOptions;
     this.callback = this._initFunction(config.callback);
+    this.executedCb = false;
     this.handle = this._initFunction(config.handle);
     this.app = app;
   }
@@ -56,6 +57,7 @@ export default class Schedule {
   }
 
   execCb() {
+    this.executedCb = true;
     return this._execFunc(this.callback);
   }
 }
