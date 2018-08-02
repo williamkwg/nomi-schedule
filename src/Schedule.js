@@ -58,6 +58,6 @@ export default class Schedule {
 
   execCb() {
     this.executedCb = true;
-    return this._execFunc(this.callback);
+    return this.callback && this._execFunc(this.callback);
   }
 }
