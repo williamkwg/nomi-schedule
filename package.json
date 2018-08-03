@@ -4,7 +4,8 @@
   "description": "nomi-schedule",
   "main": "./src/ScheduleLoader.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "babel-node --inspect index.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "babel-runtime": "^6.26.0",
+    "cron-parser": "^2.5.0",
     "ms": "^2.1.1",
     "safe-timers": "^1.1.0",
     "transform-runtime": "0.0.0"

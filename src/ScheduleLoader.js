@@ -1,5 +1,5 @@
 import { defaultDir }  from './config';
-import { readDirSync } from 'fs';
+import { readdirSync } from 'fs';
 import { isArray, isString } from 'util'; 
 import Schedule from './Schedule';
 import { join } from 'path'
@@ -47,7 +47,7 @@ export default class {
   _readDir(dir) {
     dir = dir || defaultDir;
     if (isString(dir)) {
-      dir = [scheduleDir];
+      dir = [dir];
     } 
     if (!isArray(dir)) {
       console.log(`the dir of schedule is error`);
@@ -60,7 +60,7 @@ export default class {
     let scheduleInstance = null;
     let key = null;
     dir.forEach(dirItem => {
-      files.concat(readDirSync(dirItem).map(file => { return `${dirItem}/${file}`} ));
+      files.concat(readdirSync(dirItem).map(file => { return `${dirItem}/${file}`} ));
     });
     files.forEach(file => {
       schedule = require(join(process.cwd(), file)).default;
@@ -80,12 +80,12 @@ export default class {
     this.validScheduleMap = validScheduleMap; // enabled Schedules Map
   }
   _runAll() {
-    this.validScheduleMap.values().forEach((schedule) => {
+    this.validScheduleMap.forEach((schedule, name) => {
       if (schedule.immediate) {
-        this.immediateMap.set(schedule.name, setImmediate(this._execSchedule, schedule));
+        this.immediateMap.set(name, setImmediate(this._execSchedule, schedule));
       }
       if (schedule.interval) {
-        this.intervalMap.set(schedule.name, this.setInterval(this._execSchedule, schedule.interval, schedule));
+        this.intervalMap.set(name, this.setInterval(this._execSchedule, schedule.interval, schedule));
       }
       if (schedule.cron) {
         try {
@@ -94,7 +94,7 @@ export default class {
             this.timeoutMap.set(name, timer);
           });
         } catch (error) {
-          console.log(`${schedule.name}\`s cron expression error`);
+          console.log(`${name}\`s cron expression error`);
           throw error;
         }
       }
@@ -132,13 +132,13 @@ export default class {
   
   // 对外暴露的api : 用户 清除所有定时器 （程序退出等时机）
   closeAll() {
-    this.intervalMap.values().forEach(timer => {
+    this.intervalMap.forEach(timer => {
       clearInterval(timer);
     });
-    this.timeoutMap.values().forEach(timer => {
+    this.timeoutMap.forEach(timer => {
       clearTimeout(timer);
     });
-    clearImmediate && this.immediateMap.values().forEach(timer => {
+    clearImmediate && this.immediateMap.forEach(timer => {
       clearImmediate(timer);
     })
     this.intervalMap.clear();
