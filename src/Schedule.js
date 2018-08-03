@@ -25,13 +25,14 @@ export default class Schedule {
     }
     if (isString(handle)) {
       const pos = handle.lastIndexOf(split);
-      const method = handle.subString(pos + 1);
-      const fileName = join(process.cwd(), handle.subString(0, pos).replace(split, '/'));
+      const method = handle.substring(pos + 1);
+      const fileName = join(process.cwd(), handle.substring(0, pos).replace(new RegExp(`\\${split}`, 'g'), '/'));
       const scheduleClass = require(fileName).default;
       try {
         const instance = new scheduleClass();
         return instance && instance[method];
       } catch (error) {
+        console.log(`new schedule err`)
         return scheduleClass[method];
       }
     }
@@ -49,6 +50,7 @@ export default class Schedule {
     try {
       return await func(arg) || this;
     } catch (error) {
+      console.log(`run ${func} error`)
       return this;
     }
   }

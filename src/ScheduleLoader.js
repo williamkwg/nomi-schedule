@@ -24,16 +24,16 @@ export default class {
     this._readDir(scheduleDir);
     this.app = app;
     this._runAll();
-    this._initTimer();
   }
 
-  _initTimer() {
-    [setTimeout, setInterval].forEach((fn) => {
-      this[`${fn.toString()}`] = (handle, delay, ...arg) => {
-        const fn = delay < timers.maxInterval ? fn : timers[fn];
-        return fn(handle, delay, ...arg);
-      }
-    });
+  _safeInterval(handle, delay, ...arg) {
+    const fn = delay < timers.maxInterval ? setInterval : timers.setInterval;
+    return fn(handle, delay, ...arg);
+  }
+
+  _safeTimeout(handle, delay, ...arg) {
+    const fn = delay < timers.maxInterval ? setTimeout : timers.setTimeout;
+    return fn(handle, delay, ...arg);
   }
 
   _execSchedule(schedule) {
@@ -60,10 +60,10 @@ export default class {
     let scheduleInstance = null;
     let key = null;
     dir.forEach(dirItem => {
-      files.concat(readdirSync(dirItem).map(file => { return `${dirItem}/${file}`} ));
+      files = files.concat(readdirSync(dirItem).map(file => { return `${dirItem}/${file}`} ));
     });
     files.forEach(file => {
-      schedule = require(join(process.cwd(), file)).default;
+      schedule = require(join(process.cwd(), file));
       schedule.name = schedule.name || file;
       key = schedule.name;
       scheduleInstance = null;
@@ -85,7 +85,7 @@ export default class {
         this.immediateMap.set(name, setImmediate(this._execSchedule, schedule));
       }
       if (schedule.interval) {
-        this.intervalMap.set(name, this.setInterval(this._execSchedule, schedule.interval, schedule));
+        this.intervalMap.set(name, this._safeInterval(this._execSchedule, schedule.interval, schedule));
       }
       if (schedule.cron) {
         try {
@@ -114,7 +114,7 @@ export default class {
       console.log(`${name} stop`);
       throw err;
     }
-    const timer = this.setTimeout(() => {
+    const timer = this._safeTimeout(() => {
       this._execSchedule(schedule);
       this._runTimeoutByCron(name, intervalInst, cb);
     }, nextTickTime - now);
