@@ -2,13 +2,15 @@ import { defaultConfig } from './config';
 import { isString, isFunction } from 'util';
 import { join } from 'path';
 import ms from 'ms';
-const split = '.'
+
+const split = '.';
+const replaceSplit = '/';
 
 export default class Schedule {
   constructor(config, global) {
     config = {...defaultConfig, ...config};
     this.global = global;
-    this.name = config.name;
+    this.name = config.name || this._initName(config.file);
     this.interval = isNaN(config.interval) && config.interval ? ms(config.interval) : config.interval;
     this.immediate = config.immediate;
     this.cron = config.cron;
@@ -19,21 +21,27 @@ export default class Schedule {
     this.handle = this._initFunction(config.handle);
   }
 
+  _initName(file) {
+    const pos = file.lastIndexOf(split);
+    return file.substring(0, pos).replace(new RegExp(`\\${replaceSplit}`, 'g'), split)
+  }
+
   _initFunction(handle) {
     if (!handle) {
       return null;
     }
     if (isString(handle)) {
-      const pos = handle.lastIndexOf(split);
-      const method = handle.substring(pos + 1);
-      const fileName = join(process.cwd(), handle.substring(0, pos).replace(new RegExp(`\\${split}`, 'g'), '/'));
-      const scheduleClass = require(fileName).default;
+      const pos = handle.lastIndexOf(split),
+            method = handle.substring(pos + 1),
+            fileName = join(process.cwd(), handle.substring(0, pos).replace(new RegExp(`\\${split}`, 'g'), replaceSplit)),
+            scheduleClass = require(fileName).default;
+      let instance = null;
       try {
-        const instance = new scheduleClass();
+        instance = new scheduleClass();
         return instance && instance[method];
       } catch (error) {
         console.log(`new schedule err`)
-        return scheduleClass[method];
+        return scheduleClass[method] || instance;
       }
     }
     if (isFunction(handle)) {

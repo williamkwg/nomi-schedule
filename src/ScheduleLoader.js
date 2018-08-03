@@ -6,6 +6,9 @@ import { join } from 'path'
 import timers from 'safe-timers';
 import { parseExpression } from 'cron-parser';
 
+const split = '.';
+const replaceSplit = '/';
+
 /**
  * @description nomi-schedule-manager class 
  * @api runSchedule   closeAll   close
@@ -45,7 +48,6 @@ export default class {
   }
 
   _readDir(dir) {
-    const global = this.global;
     dir = dir || defaultDir;
     if (isString(dir)) {
       dir = [dir];
@@ -54,32 +56,48 @@ export default class {
       console.log(`the dir of schedule is error`);
       return null;
     }
-    let scheduleMap = new Map(); 
-    let validScheduleMap = new Map();
     let files = []; // [dirA/file1, dirA/file2, dirB/file1]
-    let schedule = null;
-    let scheduleInstance = null;
-    let key = null;
     dir.forEach(dirItem => {
       files = files.concat(readdirSync(dirItem).map(file => { return `${dirItem}/${file}`} ));
     });
-    files.forEach(file => {
-      schedule = require(join(process.cwd(), file));
-      schedule.name = schedule.name || file;
-      key = schedule.name;
-      scheduleInstance = null;
-      if (!scheduleMap.has(key)) {
-        scheduleInstance = new Schedule(schedule, global);
-        scheduleMap.set(key, scheduleInstance);
-      }
-      if (!(validScheduleMap.has(key) || schedule.disabled)) {
-        scheduleInstance = scheduleInstance || new Schedule(schedule, global);
-        validScheduleMap.set(key, scheduleInstance);
-      }
-    });
+    const {scheduleMap, validScheduleMap} = this._initMap(files);
     this.scheduleMap = scheduleMap; // {"schedule.name": the schedule instance }
     this.validScheduleMap = validScheduleMap; // enabled Schedules Map
   }
+
+  _initMap(files) {
+    let scheduleMap = new Map(),
+        validScheduleMap = new Map(),
+        schedule = null,
+        scheduleInstance = null,
+        key = null;
+    files.forEach(file => {
+      schedule = require(join(process.cwd(), file));
+      schedule.file = file;
+      schedule.name = schedule.name || this._getKey(file);
+      key = schedule.name;
+      scheduleInstance = null;
+      if (!scheduleMap.has(key)) {
+        scheduleInstance = new Schedule(schedule, this.global);
+        scheduleMap.set(key, scheduleInstance);
+      }
+      if (!(validScheduleMap.has(key) || schedule.disabled)) {
+        scheduleInstance = scheduleInstance || new Schedule(schedule, this.global);
+        validScheduleMap.set(key, scheduleInstance);
+      }
+    });
+    return {
+      validScheduleMap,
+      scheduleMap
+    }
+  }
+
+
+  _getKey(file) {
+    const pos = file.lastIndexOf(split);
+    return file.substring(0, pos).replace(new RegExp(`\\${replaceSplit}`, 'g'), split)
+  }
+
   _runAll() {
     this.validScheduleMap.forEach((schedule, name) => {
       if (schedule.immediate) {
