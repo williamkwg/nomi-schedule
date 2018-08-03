@@ -1,6 +1,6 @@
 export default class {
   constructor() {}
-  fetchData() {
-    console.log(`fetchData`)
+  fetchData(app) {
+    console.log(`fetchData ${app.env}`)
   }
 }

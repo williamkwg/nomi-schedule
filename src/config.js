@@ -5,7 +5,6 @@ export const defaultConfig = {
   handle: (app) => {}, // handle: dirA.childrenDirA.file.method
   callback: (app) => {},
   disabled: false,
-  corn: '*/24 * * *',
   immediate: false
 }
 

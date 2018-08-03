@@ -10,7 +10,7 @@ import { parseExpression } from 'cron-parser';
  * @description nomi-schedule-manager class 
  * @api runSchedule   closeAll   close
  * @author weiguo.kong 
- * @arg scheduleDir<Array | String>: 定时任务所在的目录   app<Object> 非必需 定时任务handle的参数
+ * @arg scheduleDir<Array | String>: 定时任务所在的目录   global<Object> 非必需 定时任务handle的参数
  */
 export default class {
   scheduleMap = new Map();
@@ -19,10 +19,10 @@ export default class {
   timeoutMap = new Map();
   immediateMap = new Map();
 
-  constructor(scheduleDir, app) {
+  constructor(scheduleDir, global) {
+    this.global = global;
     this._scheduleDir = scheduleDir || defaultDir; // the dir of all schedule
     this._readDir(scheduleDir);
-    this.app = app;
     this._runAll();
   }
 
@@ -40,11 +40,12 @@ export default class {
     if (!schedule) {
       return;
     }
-    schedule.exec();
-    !schedule.executedCb && schedule.execCb();
+    schedule.exec && schedule.exec();
+    !schedule.executedCb && schedule.execCb && schedule.execCb();
   }
 
   _readDir(dir) {
+    const global = this.global;
     dir = dir || defaultDir;
     if (isString(dir)) {
       dir = [dir];
@@ -68,11 +69,11 @@ export default class {
       key = schedule.name;
       scheduleInstance = null;
       if (!scheduleMap.has(key)) {
-        scheduleInstance = new Schedule(schedule, this.app);
+        scheduleInstance = new Schedule(schedule, global);
         scheduleMap.set(key, scheduleInstance);
       }
       if (!(validScheduleMap.has(key) || schedule.disabled)) {
-        scheduleInstance = scheduleInstance || new Schedule(schedule, this.app);
+        scheduleInstance = scheduleInstance || new Schedule(schedule, global);
         validScheduleMap.set(key, scheduleInstance);
       }
     });
@@ -86,6 +87,7 @@ export default class {
       }
       if (schedule.interval) {
         this.intervalMap.set(name, this._safeInterval(this._execSchedule, schedule.interval, schedule));
+        return;
       }
       if (schedule.cron) {
         try {

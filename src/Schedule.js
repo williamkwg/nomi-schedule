@@ -5,18 +5,18 @@ import ms from 'ms';
 const split = '.'
 
 export default class Schedule {
-  constructor(config, app) {
+  constructor(config, global) {
     config = {...defaultConfig, ...config};
+    this.global = global;
     this.name = config.name;
-    this.interval = isNaN(config.interval) ? ms(config.interval) : config.interval;
+    this.interval = isNaN(config.interval) && config.interval ? ms(config.interval) : config.interval;
     this.immediate = config.immediate;
-    this.corn = config.corn;
+    this.cron = config.cron;
     this.disabled = config.disabled;
     this.cronOptions = config.cronOptions;
     this.callback = this._initFunction(config.callback);
     this.executedCb = false;
     this.handle = this._initFunction(config.handle);
-    this.app = app;
   }
 
   _initFunction(handle) {
@@ -43,7 +43,7 @@ export default class Schedule {
   }
   
   async _execFunc(func, arg) {
-    arg = arg || this.app;
+    arg = arg || this.global;
     if (!func) {
       return this;
     }

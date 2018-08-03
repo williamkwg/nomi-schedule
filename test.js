@@ -1,10 +1,11 @@
 import ScheduleLoader from './src/ScheduleLoader';
 let app = {
   config: {},
-  env: 'dev'
+  env: 'dev',
+  name: 'nomi'
 }
 const sLoader = new ScheduleLoader(['test/schedule'], app);
 
 setTimeout(() => {
   sLoader.closeAll();
-}, 10000)
+}, 100000)
