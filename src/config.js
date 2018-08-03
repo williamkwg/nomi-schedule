@@ -4,6 +4,7 @@ export const defaultConfig = {
   name: 'defaultSchedule', // default fileName 
   handle: (app) => {}, // handle: dirA.childrenDirA.file.method
   callback: (app) => {},
+  disabled: false,
   corn: '*/24 * * *',
   immediate: false
 }

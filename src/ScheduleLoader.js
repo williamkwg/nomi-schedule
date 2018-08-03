@@ -125,7 +125,7 @@ export default class {
   }
   
   // 对外暴露的api : 用户 清除所有定时器 （程序退出等时机）
-  close() {
+  closeAll() {
     this.intervalMap.values().forEach(timer => {
       clearInterval(timer);
     });
@@ -138,5 +138,33 @@ export default class {
     this.intervalMap.clear();
     this.timeoutMap.clear();
     this.immediateMap.clear();
+    this.validScheduleMap.clear();
+  }
+  // api: 清除某一个定时任务
+  close(name) {
+    if (this.intervalMap.has(name)) {
+      clearInterval(this.intervalMap.get(name));
+      this.intervalMap.delete(name);
+    }
+    if (this.timeoutMap.has(name)) {
+      clearInterval(this.timeoutMap.get(name));
+      this.timeoutMap.delete(name);
+    }
+    if (this.immediateMap.has(name)) {
+      clearInterval(this.immediateMap.get(name));
+      this.immediateMap.delete(name);
+    }
+    if (this.validScheduleMap.has(name)) {
+      this.validScheduleMap.get(name).setDisable(true);
+      this.validScheduleMap.delete(name);
+    }
+  }
+
+  getEnableSchedule() {
+    return this.validScheduleMap;
+  }
+
+  getAllSchedule() {
+    return this.scheduleMap;
   }
 }

@@ -11,6 +11,7 @@ export default class Schedule {
     this.interval = isNaN(config.interval) ? ms(config.interval) : config.interval;
     this.immediate = config.immediate;
     this.corn = config.corn;
+    this.disabled = config.disabled;
     this.cronOptions = config.cronOptions;
     this.callback = this._initFunction(config.callback);
     this.executedCb = false;
@@ -59,5 +60,9 @@ export default class Schedule {
   execCb() {
     this.executedCb = true;
     return this.callback && this._execFunc(this.callback);
+  }
+
+  setDisable(status) {
+    this.disabled = status;
   }
 }
