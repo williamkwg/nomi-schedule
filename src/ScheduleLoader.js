@@ -4,8 +4,14 @@ import { isArray, isString } from 'util';
 import Schedule from './Schedule';
 import { join } from 'path'
 import timers from 'safe-timers';
-import parse from 'cron-parser';
+import { parseExpression } from 'cron-parser';
 
+/**
+ * @description nomi-schedule-manager class 
+ * @api runSchedule   closeAll   close
+ * @author weiguo.kong 
+ * @arg scheduleDir<Array | String>: 定时任务所在的目录   app<Object> 非必需 定时任务handle的参数
+ */
 export default class {
   scheduleMap = new Map();
   validScheduleMap = new Map();
@@ -83,7 +89,7 @@ export default class {
       }
       if (schedule.cron) {
         try {
-          const intervalInst = parser.parseExpression(schedule.cron, schedule.cronOptions);
+          const intervalInst = parseExpression(schedule.cron, schedule.cronOptions);
           this._runTimeoutByCron(schedule, intervalInst, timer => {
             this.timeoutMap.set(name, timer);
           });
