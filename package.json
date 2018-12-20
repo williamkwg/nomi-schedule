@@ -1,21 +1,25 @@
 {
   "name": "nomi-schedule",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "nomi-schedule",
-  "main": "./src/ScheduleLoader.js",
+  "main": "./lib/ScheduleLoader.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "babel-node --inspect test.js"
+    "start": "babel-node --inspect test.js",
+    "build": "babel src --out-dir lib"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.corp.qunar.com:fed/nomi-schedule.git"
+    "url": "https://github.com/williamkwg/nomi-schedule.git",
+    "innerurl": "git@gitlab.corp.qunar.com:fed/nomi-schedule.git"
   },
   "keywords": [
     "nomi",
-    "nomi-schedule"
+    "nomi-schedule",
+    "schedule"
   ],
   "author": "weiguo.kong",
+  "email": "weiguo.kong@qunar.com",
   "license": "ISC",
   "dependencies": {
     "babel-runtime": "^6.26.0",
